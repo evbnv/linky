@@ -2,10 +2,8 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
-	"linky/store"
+	"linky/service"
 	"net/http"
-	"strconv"
 )
 
 type ShortenRequest struct {
@@ -22,35 +20,17 @@ func HandleAddress(w http.ResponseWriter, r *http.Request) {
 	case "POST":
 		var req ShortenRequest
 		var resp ShortenResponse
-		var shortUrl string
+		var shortURL string
+
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		if !store.MapCreated {
-			store.URLs = make(map[string]string)
-			fmt.Println("Created!")
-		}
-		store.MapCreated = true
-		longUrl := req.URL
+		longURL := req.URL
+		shortURL = service.URLTransform(longURL)
 
-		for {
-			shortUrl = store.URLTransform(longUrl)
-
-			if _, ok := store.URLs[shortUrl]; !ok {
-				store.URLs[shortUrl] = longUrl
-				break
-			}
-
-			longUrl = longUrl + ":" + strconv.Itoa(store.Count)
-			store.Count++
-		}
-		//
-		fmt.Println(store.URLs)
-		//
-
-		resp = ShortenResponse{ShortURL: shortUrl}
+		resp = ShortenResponse{ShortURL: shortURL}
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
