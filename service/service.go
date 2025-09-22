@@ -3,30 +3,32 @@ package service
 import (
 	"crypto/sha256"
 	"encoding/base64"
-	"linky/store"
+	"linky/database"
 	"log"
 	"strconv"
 )
 
-var MapCreated bool
 var count int
 
 func URLTransform(longURL string) string {
 	var shortURL string
 
-	h := sha256.New()
-
 	for {
-		shortURL = base64.URLEncoding.EncodeToString([]byte(h.Sum(nil)[:8]))
-		if _, ok := store.URLs[shortURL]; !ok {
-			store.URLs[shortURL] = longURL
-			break
-		}
-		// there is collision
-		log.Println("There is collision")
-		longURL = longURL + ":" + strconv.Itoa(count)
-		count++
+		h := sha256.New()
 		h.Write([]byte(longURL))
+		shortURL = base64.URLEncoding.EncodeToString([]byte(h.Sum(nil)[:8]))
+
+		query := "INSERT INTO urls (short_url, long_url) VALUES ($1, $2)"
+		_, err := database.PostgresClient.Exec(query, shortURL, longURL)
+		if err != nil {
+			log.Println(err)
+			// there is collision
+			log.Println("There is collision")
+			longURL = longURL + ":" + strconv.Itoa(count)
+			count++
+			continue
+		}
+		break
 	}
 	log.Println("Short URL created")
 	return shortURL
