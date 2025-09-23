@@ -2,6 +2,8 @@ package database
 
 import (
 	"database/sql"
+	"fmt"
+	"linky/envs"
 	"log"
 
 	_ "github.com/lib/pq"
@@ -10,7 +12,12 @@ import (
 var PostgresClient *sql.DB
 
 func InitDatabase() error {
-	connStr := "user=postgres password=gtyIEmdxcfu3783!_12 dbname=linky sslmode=disable"
+	envs := &envs.ServerEnvs
+	connStr := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=%s",
+		envs.POSTGRES_USER,
+		envs.POSTGRES_PASSWORD,
+		envs.POSTGRES_NAME,
+		envs.POSTGRES_USE_SSL)
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		return err
@@ -30,11 +37,11 @@ func InitDatabase() error {
 }
 
 func createURLTable() error {
-	quary := `CREATE TABLE IF NOT EXISTS urls (
+	query := `CREATE TABLE IF NOT EXISTS urls (
     	short_url VARCHAR(255) PRIMARY KEY,
     	long_url TEXT NOT NULL
 	)`
 	log.Println("Create table if not exists")
-	_, err := PostgresClient.Exec(quary)
+	_, err := PostgresClient.Exec(query)
 	return err
 }

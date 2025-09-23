@@ -33,3 +33,14 @@ func URLTransform(longURL string) string {
 	log.Println("Short URL created")
 	return shortURL
 }
+
+func GetLongURL(shortURL string) (string, error) {
+	query := "SELECT long_url FROM urls WHERE short_url = $1"
+	row := database.PostgresClient.QueryRow(query, shortURL)
+
+	var longURL string
+	if err := row.Scan(&longURL); err != nil {
+		return "", err
+	}
+	return longURL, nil
+}

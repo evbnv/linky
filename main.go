@@ -1,24 +1,13 @@
 package main
 
 import (
-	"linky/database"
-	"linky/handlers"
-	"log"
-	"net/http"
+	"linky/server"
 )
 
 func init() {
-	// Init database
-	errDatabase := database.InitDatabase()
-	if errDatabase != nil {
-		log.Fatal("Ошибка подключения к базе данных: ", errDatabase)
-	} else {
-		log.Println("Успешное подключение к базе данных")
-	}
+	server.InitServer()
 }
 
 func main() {
-	http.HandleFunc("/api/", handlers.HandleAddress)
-
-	http.ListenAndServe(":8080", nil)
+	server.StartServer()
 }
