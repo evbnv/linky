@@ -5,10 +5,9 @@ import (
 	"encoding/base64"
 	"linky/database"
 	"log"
+	"math/rand"
 	"strconv"
 )
-
-var count int
 
 func URLTransform(longURL string) string {
 	var shortURL string
@@ -24,8 +23,7 @@ func URLTransform(longURL string) string {
 			log.Println(err)
 			// there is collision
 			log.Println("There is collision")
-			longURL = longURL + ":" + strconv.Itoa(count)
-			count++
+			longURL = longURL + ":" + strconv.Itoa(rand.Int())
 			continue
 		}
 		break
