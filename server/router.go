@@ -2,12 +2,15 @@ package server
 
 import (
 	"linky/handlers"
+	"linky/service"
 	"net/http"
 )
 
-func InitRoutes() {
-	http.HandleFunc("/api/shorten", handlers.POST)
-	http.HandleFunc("/", handlers.GET)
+func InitRoutes(s *service.Service) {
+	h := handlers.NewHandler(s)
+
+	http.HandleFunc("/api/shorten", h.MakeShortURLHandler)
+	http.HandleFunc("/", h.GetLongURLHandler)
 
 	http.ListenAndServe(":8080", nil)
 }

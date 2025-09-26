@@ -3,13 +3,21 @@ package service
 import (
 	"crypto/sha256"
 	"encoding/base64"
-	"linky/database"
+	"linky/models"
 	"log"
 	"math/rand"
 	"strconv"
 )
 
-func URLTransform(longURL string) string {
+type Service struct {
+	store models.Storer
+}
+
+func NewService(s models.Storer) *Service {
+	return &Service{store: s}
+}
+
+func (s *Service) URLTransform(longURL string) string {
 	var shortURL string
 
 	for {
@@ -17,8 +25,7 @@ func URLTransform(longURL string) string {
 		h.Write([]byte(longURL))
 		shortURL = base64.URLEncoding.EncodeToString([]byte(h.Sum(nil)[:8]))
 
-		query := "INSERT INTO urls (short_url, long_url) VALUES ($1, $2)"
-		_, err := database.PostgresClient.Exec(query, shortURL, longURL)
+		err := s.store.SaveURL(shortURL, longURL)
 		if err != nil {
 			log.Println(err)
 			// there is collision
@@ -32,13 +39,7 @@ func URLTransform(longURL string) string {
 	return shortURL
 }
 
-func GetLongURL(shortURL string) (string, error) {
-	query := "SELECT long_url FROM urls WHERE short_url = $1"
-	row := database.PostgresClient.QueryRow(query, shortURL)
-
-	var longURL string
-	if err := row.Scan(&longURL); err != nil {
-		return "", err
-	}
-	return longURL, nil
+func (s *Service) GetLongURL(shortURL string) (string, error) {
+	longURL, err := s.store.GetURL(shortURL)
+	return longURL, err
 }

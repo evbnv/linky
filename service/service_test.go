@@ -1,20 +1,23 @@
 package service
 
-import "testing"
+import (
+	"linky/models"
+	"testing"
+)
 
 func TestGetLongURL(t *testing.T) {
 	mockStore := &MockStore{
 		urls: make(map[string]string),
 	}
 
-	s := NewService(mockStore)
+	s := models.NewService(mockStore)
 
-	err := s.store.SaveURL("test1", "http://example.com/test1")
+	err := s.Store.SaveURL("test1", "http://example.com/test1")
 	if err != nil {
 		t.Fatalf("failed to save mock URL: %v", err)
 	}
 
-	longURL, err := s.store.GetURL("test1")
+	longURL, err := s.Store.GetURL("test1")
 
 	if err != nil {
 		t.Errorf("expected no error, but got: %v", err)

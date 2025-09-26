@@ -3,10 +3,11 @@ package server
 import (
 	"linky/database"
 	"linky/envs"
+	"linky/service"
 	"log"
 )
 
-func InitServer() {
+func RunServer() {
 	// Load envs
 	errEnvs := envs.LoadEnvs()
 	if errEnvs != nil {
@@ -16,14 +17,14 @@ func InitServer() {
 		log.Println("Инициализация ENV прошла успешно")
 	}
 	// Init database
-	errDatabase := database.InitDatabase()
+	dbClient, errDatabase := database.InitDatabase()
 	if errDatabase != nil {
 		log.Fatal("Ошибка подключения к базе данных: ", errDatabase)
 	} else {
 		log.Println("Успешное подключение к базе данных")
 	}
-}
-
-func StartServer() {
-	InitRoutes()
+	// Init store, service, routes
+	myStore := database.NewPostgresStore(dbClient)
+	myService := service.NewService(myStore)
+	InitRoutes(myService)
 }
