@@ -4,6 +4,7 @@ import "errors"
 
 type MockStore struct {
 	urls map[string]string
+	SaveCalls int
 }
 
 func NewMockStore() *MockStore {
@@ -13,6 +14,7 @@ func NewMockStore() *MockStore {
 }
 
 func (m *MockStore) SaveURL(shortURL, longURL string) error {
+	m.SaveCalls++
 	if _, ok := m.urls[shortURL]; ok {
 		return errors.New("collision")
 	}
