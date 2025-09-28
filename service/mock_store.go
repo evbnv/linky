@@ -3,7 +3,7 @@ package service
 import "errors"
 
 type MockStore struct {
-	urls map[string]string
+	urls      map[string]string
 	SaveCalls int
 }
 

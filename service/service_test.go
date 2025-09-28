@@ -3,30 +3,54 @@ package service
 import (
 	"crypto/sha256"
 	"encoding/base64"
-	"linky/models"
+	"errors"
 	"strings"
 	"testing"
 )
 
 func TestGetLongURL(t *testing.T) {
-	mockStore := &MockStore{
-		urls: make(map[string]string),
+	tests := []struct {
+		name            string
+		shortURL        string
+		mockSetup       map[string]string
+		expectedLongURL string
+		expectedError   error
+	}{
+		{
+			name:            "Успешное получение",
+			shortURL:        "testkey1",
+			mockSetup:       map[string]string{"testkey1": "https://example.com/original1"},
+			expectedLongURL: "https://example.com/original1",
+			expectedError:   nil,
+		},
+		{
+			name:            "Ключ не найден (404)",
+			shortURL:        "missingkey",
+			mockSetup:       map[string]string{"existing": "http://present.com"},
+			expectedLongURL: "",
+			expectedError:   errors.New("not found 404"),
+		},
 	}
 
-	s := models.NewService(mockStore)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockStore := NewMockStore()
+			for short, long := range tt.mockSetup {
+				mockStore.urls[short] = long
+			}
 
-	err := s.Store.SaveURL("test1", "http://example.com/test1")
-	if err != nil {
-		t.Fatalf("failed to save mock URL: %v", err)
-	}
+			s := NewService(mockStore)
 
-	longURL, err := s.Store.GetURL("test1")
+			longURL, err := s.GetLongURL(tt.shortURL)
 
-	if err != nil {
-		t.Errorf("expected no error, but got: %v", err)
-	}
-	if longURL != "http://example.com/test1" {
-		t.Errorf("expected 'http://example.com/test1', but got '%s'", longURL)
+			if !errors.Is(err, tt.expectedError) && err != tt.expectedError && err.Error() != tt.expectedError.Error() {
+				t.Fatalf("Ошибка не совпадает. Ожидалась: '%v', Получено: '%v'", tt.expectedError, err)
+			}
+
+			if longURL != tt.expectedLongURL {
+				t.Errorf("Полученный URL не совпадает. Ожидалось: '%s', Получено: '%s'", tt.expectedLongURL, longURL)
+			}
+		})
 	}
 }
 
