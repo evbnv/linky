@@ -19,18 +19,18 @@ func NewService(s models.Storer) *Service {
 
 func (s *Service) URLTransform(longURL string) string {
 	var shortURL string
+	tempLongURL := longURL
 
 	for {
 		h := sha256.New()
-		h.Write([]byte(longURL))
+		h.Write([]byte(tempLongURL))
 		shortURL = base64.URLEncoding.EncodeToString([]byte(h.Sum(nil)[:8]))
-
 		err := s.store.SaveURL(shortURL, longURL)
 		if err != nil {
 			log.Println(err)
 			// there is collision
 			log.Println("There is collision")
-			longURL = longURL + ":" + strconv.Itoa(rand.Int())
+			tempLongURL = longURL + ":" + strconv.Itoa(rand.Int())
 			continue
 		}
 		break
