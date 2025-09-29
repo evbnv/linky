@@ -18,6 +18,10 @@ func NewHandler(s *service.Service) *Handler {
 }
 
 func (h *Handler) GetLongURLHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
 	shortPath := strings.TrimPrefix(r.URL.Path, "/")
 	longPath, err := h.service.GetLongURL(shortPath)
 	if err != nil {
@@ -29,6 +33,10 @@ func (h *Handler) GetLongURLHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) MakeShortURLHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
 	var req models.ShortenRequest
 	var resp models.ShortenResponse
 	var shortURL string
