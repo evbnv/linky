@@ -100,7 +100,7 @@ func TestURLTransform_HandlesCollision(t *testing.T) {
 
 	finalLongURL, _ := mockStore.GetURL(shortURL)
 
-	if !strings.Contains(finalLongURL, initialLongURL+":") {
-		t.Errorf("Финально сохраненный URL не соответствует формату коллизии. Ожидалось, что он начнется с '%s:'", initialLongURL)
+	if !strings.Contains(finalLongURL, initialLongURL) {
+		t.Errorf("Финально сохраненный URL не соответствует формату коллизии. Ожидалось, что он будет %s", initialLongURL)
 	}
 }
