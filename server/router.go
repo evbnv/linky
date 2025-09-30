@@ -9,8 +9,10 @@ import (
 func InitRoutes(s *service.Service) {
 	h := handlers.NewHandler(s)
 
-	http.HandleFunc("/api/shorten", h.MakeShortURLHandler)
-	http.HandleFunc("/", h.GetLongURLHandler)
+	mux := http.NewServeMux()
 
-	http.ListenAndServe(":8080", nil)
+	mux.HandleFunc("/api/shorten", h.PostShortURLHandler)
+	mux.HandleFunc("/", h.GetLongURLHandler)
+
+	http.ListenAndServe(":8080", mux)
 }

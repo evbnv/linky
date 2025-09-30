@@ -17,11 +17,21 @@ func NewHandler(s *service.Service) *Handler {
 	return &Handler{service: s}
 }
 
+func (h *Handler) serveIndexHandler(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "web/index.html")
+}
+
 func (h *Handler) GetLongURLHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
 	}
+
+	if r.URL.Path == "/" || strings.Contains(r.URL.Path, ".") {
+		h.serveIndexHandler(w, r)
+		return
+	}
+
 	shortPath := strings.TrimPrefix(r.URL.Path, "/")
 	longPath, err := h.service.GetLongURL(shortPath)
 	if err != nil {
@@ -32,7 +42,7 @@ func (h *Handler) GetLongURLHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, longPath, http.StatusPermanentRedirect)
 }
 
-func (h *Handler) MakeShortURLHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) PostShortURLHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
