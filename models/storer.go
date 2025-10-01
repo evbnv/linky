@@ -10,7 +10,7 @@ type Service struct {
 }
 
 type ShortenRequest struct {
-	URL string `json:"url"`
+	URL string `json:"long_url"`
 }
 type ShortenResponse struct {
 	ShortURL string `json:"short_url"`
