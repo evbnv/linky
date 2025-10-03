@@ -1,1 +1,1 @@
-Linky - url shortener
+Linky - simple URL shortener
