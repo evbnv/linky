@@ -6,6 +6,7 @@ import (
 	"linky/service"
 	"log"
 	"net/http"
+	"net/url"
 	"strings"
 )
 
@@ -47,6 +48,7 @@ func (h *Handler) PostShortURLHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
 	}
+
 	var req models.ShortenRequest
 	var resp models.ShortenResponse
 	var shortURL string
@@ -56,8 +58,22 @@ func (h *Handler) PostShortURLHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	longURL := req.URL
-	shortURL = h.service.URLTransform(longURL)
+	// URL validation
+	if req.URL == "" {
+		http.Error(w, `{"error": "URL cannot be empty"}`, http.StatusBadRequest)
+		return
+	}
+
+	parsedURL, err := url.Parse(req.URL)
+	if err != nil || (parsedURL.Scheme != "http" && parsedURL.Scheme != "https") {
+		if parsedURL, err = url.Parse("https://" + req.URL); err != nil {
+			http.Error(w, `{"error": "Invalid URL format"}`, http.StatusBadRequest)
+			return
+		}
+	}
+
+	// URL transformation
+	shortURL = h.service.URLTransform(parsedURL.String())
 
 	resp = models.ShortenResponse{ShortURL: shortURL}
 
