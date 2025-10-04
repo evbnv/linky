@@ -14,12 +14,12 @@ type Handler struct {
 	service *service.Service
 }
 
-func NewHandler(s *service.Service) *Handler {
-	return &Handler{service: s}
+type ErrorResponse struct {
+	Error string `json:"error"`
 }
 
-func (h *Handler) serveIndexHandler(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "web/index.html")
+func NewHandler(s *service.Service) *Handler {
+	return &Handler{service: s}
 }
 
 func (h *Handler) GetLongURLHandler(w http.ResponseWriter, r *http.Request) {
@@ -60,14 +60,18 @@ func (h *Handler) PostShortURLHandler(w http.ResponseWriter, r *http.Request) {
 
 	// URL validation
 	if req.URL == "" {
-		http.Error(w, `{"error": "URL cannot be empty"}`, http.StatusBadRequest)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(ErrorResponse{Error: "URL cannot be empty"})
 		return
 	}
 
 	parsedURL, err := url.Parse(req.URL)
 	if err != nil || (parsedURL.Scheme != "http" && parsedURL.Scheme != "https") {
 		if parsedURL, err = url.Parse("https://" + req.URL); err != nil {
-			http.Error(w, `{"error": "Invalid URL format"}`, http.StatusBadRequest)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode(ErrorResponse{Error: "Invalid URL. Please check the address for typos."})
 			return
 		}
 	}
@@ -80,4 +84,8 @@ func (h *Handler) PostShortURLHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(resp)
+}
+
+func (h *Handler) serveIndexHandler(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "web/index.html")
 }
