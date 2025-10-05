@@ -28,7 +28,7 @@ func (h *Handler) GetLongURLHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if r.URL.Path == "/" || strings.Contains(r.URL.Path, ".") {
+	if r.URL.Path == "/" {
 		h.serveIndexHandler(w, r)
 		return
 	}

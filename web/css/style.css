@@ -1,0 +1,171 @@
+/* ЦВЕТОВАЯ ПАЛИТРА */
+:root {
+    --color-dark: #343A40;
+    /* Темно-серый/почти черный */
+    --color-ochre-deep: #C68C42;
+    /* Глубокий горчичный/охристый */
+    --color-ochre-light: #E0B876;
+    /* Светлый горчичный/песочный */
+    --color-cream: #F8F9FA;
+    /* Сливочный/кремовый фон */
+    --color-teal: #3B8D8D;
+    /* Темно-бирюзовый/приглушенный зеленый */
+    --color-teal-dark: #2D7D7D;
+}
+
+/* ------------------------------------------------------------------- */
+/* 1. ОБЩИЕ СТИЛИ И РАСПОЛОЖЕНИЕ */
+/* ------------------------------------------------------------------- */
+
+body {
+    font-family: 'Georgia', serif;
+    /* Более винтажный шрифт */
+    margin: 0;
+    padding: 40px 20px;
+    background-color: var(--color-cream);
+    /* Кремовый фон */
+    color: var(--color-dark);
+    /* Темный текст */
+
+    /* Flexbox для центрирования контейнера */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+/* Контейнер для центрирования содержимого */
+.container {
+    max-width: 600px;
+    width: 100%;
+    background-color: #FFFFFF;
+    /* Чисто белый фон для контента */
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    /* Более выраженная тень */
+    text-align: center;
+}
+
+h1 {
+    color: var(--color-teal);
+    /* Темно-бирюзовый заголовок */
+    margin-bottom: 30px;
+    font-size: 2.2em;
+    letter-spacing: 1px;
+}
+
+/* ------------------------------------------------------------------- */
+/* 2. ФОРМА */
+/* ------------------------------------------------------------------- */
+
+#shorten-form {
+    display: flex;
+    flex-wrap: wrap;
+    /* Позволяет элементам переноситься на маленьких экранах */
+    justify-content: center;
+    gap: 10px;
+    /* Отступы между элементами */
+    margin-bottom: 20px;
+}
+
+input[type="url"] {
+    flex-grow: 1;
+    /* Поле ввода занимает доступное место */
+    padding: 12px 15px;
+    border: 1px solid var(--color-ochre-light);
+    /* Светлый горчичный бордюр */
+    border-radius: 5px;
+    font-size: 1em;
+    color: var(--color-dark);
+    background-color: #FFFFFF;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+input[type="url"]::placeholder {
+    color: #A0A0A0;
+}
+
+input[type="url"]:focus {
+    border-color: var(--color-ochre-deep);
+    /* Глубокий горчичный при фокусе */
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(198, 140, 66, 0.3);
+}
+
+button[type="submit"] {
+    padding: 12px 25px;
+    background-color: var(--color-teal);
+    /* Темно-бирюзовая кнопка */
+    color: #FFFFFF;
+    border: none;
+    border-radius: 5px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    flex-shrink: 0;
+    /* Не позволяет кнопке сжиматься */
+}
+
+button[type="submit"]:hover {
+    background-color: var(--color-teal-dark);
+    /* Чуть темнее при наведении */
+}
+
+/* ------------------------------------------------------------------- */
+/* 3. СООБЩЕНИЯ (УСПЕХ/ОШИБКА) */
+/* ------------------------------------------------------------------- */
+
+#error-message,
+#result {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 5px;
+    font-size: 0.95em;
+    text-align: left;
+    width: 100%;
+    box-sizing: border-box;
+    display: none;
+    /* Скрыто по умолчанию */
+}
+
+#error-message {
+    background-color: #FFE6E6;
+    /* Светло-красный фон */
+    color: #C00;
+    border: 1px solid #FFC0C0;
+}
+
+#result {
+    background-color: #E6FFE6;
+    /* Светло-зеленый фон */
+    border: 1px solid #C0FFC0;
+    color: #0A0;
+}
+
+#result a {
+    color: var(--color-teal);
+    /* Цвет ссылки в соответствии с палитрой */
+    text-decoration: none;
+    font-weight: bold;
+}
+
+#result a:hover {
+    text-decoration: underline;
+}
+
+/* ------------------------------------------------------------------- */
+/* 4. ОТЗЫВЧИВОСТЬ (для маленьких экранов) */
+/* ------------------------------------------------------------------- */
+
+@media (max-width: 480px) {
+    #shorten-form {
+        flex-direction: column;
+    }
+
+    input[type="url"],
+    button[type="submit"] {
+        width: 100%;
+    }
+}

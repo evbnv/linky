@@ -2,105 +2,23 @@
 <html lang="ru">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Linky - Сократитель ссылок</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 50px;
-        }
-
-        #result,
-        #error-message {
-            margin-top: 20px;
-            padding: 10px;
-            border-radius: 4px;
-        }
-
-        #error-message {
-            background-color: #fdd;
-            color: #c00;
-            border: 1px solid #c00;
-            display: none;
-            /* Скрыто по умолчанию */
-        }
-
-        #result {
-            background-color: #e6ffe6;
-            border: 1px solid #0a0;
-            display: none;
-            /* Скрыто по умолчанию */
-        }
-
-        input[type="url"] {
-            width: 300px;
-            padding: 8px;
-            margin-right: 10px;
-        }
-    </style>
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 
 <body>
-    <h1>Сокращение ссылок</h1>
+    <div class="container">
+        <h1>Сокращение ссылок</h1>
 
-    <form id="shorten-form">
-        <input type="url" id="long-url" placeholder="Введите длинную ссылку (с http/https)" required>
-        <button type="submit">Сократить</button>
-    </form>
+        <form id="shorten-form">
+            <input type="url" id="long-url" placeholder="Введите ссылку (например: youtube.com)" required>
+            <button type="submit">Сократить</button>
+        </form>
 
-    <div id="error-message"></div>
-    <div id="result"></div>
+        <div id="error-message"></div>
+        <div id="result"></div>
+    </div>
 
-    <script>
-        document.getElementById('shorten-form').addEventListener('submit', async function (event) {
-            event.preventDefault();
-
-            const longUrlInput = document.getElementById('long-url');
-            const longUrl = longUrlInput.value;
-            const resultDiv = document.getElementById('result');
-            const errorDiv = document.getElementById('error-message');
-
-            // Сброс предыдущих сообщений
-            resultDiv.style.display = 'none';
-            errorDiv.style.display = 'none';
-            errorDiv.innerHTML = '';
-
-            try {
-                const response = await fetch('/api/shorten', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    // Отправляем JSON с ключом long_url
-                    body: JSON.stringify({ long_url: longUrl })
-                });
-
-                // ВСЕГДА пытаемся получить JSON-тело, даже при ошибке, 
-                // т.к. бэкенд отправляет структурированный JSON-ответ с ошибкой
-                const data = await response.json();
-
-                if (response.ok) {
-                    // --- УСПЕХ (HTTP Status 201) ---
-                    const shortLink = data.short_url;
-
-                    resultDiv.style.display = 'block';
-                    resultDiv.innerHTML = '✅ Сокращенная ссылка: <a href="' + shortLink + '">' + shortLink + '</a>';
-
-                    // Очистка поля ввода
-                    longUrlInput.value = '';
-
-                } else {
-                    // --- ОШИБКА (HTTP Status 400, 500 и т.д.) ---
-                    errorDiv.style.display = 'block';
-                    // Показываем сообщение об ошибке, пришедшее из Go-бэкенда
-                    errorDiv.innerHTML = '❌ Ошибка: ' + (data.error || 'Неизвестная ошибка сервера');
-                }
-            } catch (e) {
-                // Ошибка сети (сервер не запущен, CORS, и т.п.)
-                errorDiv.style.display = 'block';
-                errorDiv.innerHTML = '❌ Ошибка подключения. Убедитесь, что сервер запущен.';
-            }
-        });
-    </script>
+    <script src="/js/script.js"></script>
 </body>
 
 </html>
