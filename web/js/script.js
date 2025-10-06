@@ -1,47 +1,68 @@
+// web/js/script.js
+
 document.getElementById('shorten-form').addEventListener('submit', async function (event) {
     event.preventDefault();
-
     const longUrlInput = document.getElementById('long-url');
     const longUrl = longUrlInput.value;
     const resultDiv = document.getElementById('result');
     const errorDiv = document.getElementById('error-message');
 
-    // Сброс предыдущих сообщений
+    // Сброс сообщений
     resultDiv.style.display = 'none';
     errorDiv.style.display = 'none';
     errorDiv.innerHTML = '';
+
+    if (!longUrl) {
+        errorDiv.style.display = 'flex';
+        errorDiv.innerHTML = '❌ Пожалуйста, введите ссылку.';
+        return;
+    }
+
+    // Сохраняем введенную ссылку перед отправкой
+    const initialUrl = longUrl;
 
     try {
         const response = await fetch('/api/shorten', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            // Отправляем JSON с ключом long_url
             body: JSON.stringify({ long_url: longUrl })
         });
 
-        // ВСЕГДА пытаемся получить JSON-тело, даже при ошибке, 
-        // т.к. бэкенд отправляет структурированный JSON-ответ с ошибкой
         const data = await response.json();
 
         if (response.ok) {
-            // --- УСПЕХ (HTTP Status 201) ---
             const shortLink = data.short_url;
 
-            resultDiv.style.display = 'block';
-            resultDiv.innerHTML = '✅ Сокращенная ссылка: <a href="' + shortLink + '">' + shortLink + '</a>';
+            resultDiv.style.display = 'flex';
 
-            // Очистка поля ввода
-            longUrlInput.value = '';
+            // --- ИЗМЕНЕНИЕ: УДАЛЕНА ХЛОПУШКА, ОСТАВЛЕНО ТОЛЬКО "Успех! ✨" ---
+            resultDiv.innerHTML = `
+                <div style="flex-grow: 1;">
+                    Успех! ✨ Сокращенная ссылка: <a href="${shortLink}">${shortLink}</a>
+                </div>
+                <button id="copy-button" class="copy-button">📄 Копировать</button>
+            `;
+
+            // Ссылку оставляем в поле ввода
+            longUrlInput.value = initialUrl;
+
+            document.getElementById('copy-button').addEventListener('click', () => {
+                navigator.clipboard.writeText(shortLink).then(() => {
+                    alert('Ссылка скопирована!');
+                }).catch(err => {
+                    console.error('Ошибка копирования: ', err);
+                    alert('Не удалось скопировать. Попробуйте вручную.');
+                });
+            });
 
         } else {
-            // --- ОШИБКА (HTTP Status 400, 500 и т.д.) ---
-            errorDiv.style.display = 'block';
-            // Показываем сообщение об ошибке, пришедшее из Go-бэкенда
+            errorDiv.style.display = 'flex';
             errorDiv.innerHTML = '❌ Ошибка: ' + (data.error || 'Неизвестная ошибка сервера');
+            longUrlInput.value = initialUrl; // Оставляем ссылку при ошибке
         }
     } catch (e) {
-        // Ошибка сети (сервер не запущен, CORS, и т.п.)
-        errorDiv.style.display = 'block';
+        errorDiv.style.display = 'flex';
         errorDiv.innerHTML = '❌ Ошибка подключения. Убедитесь, что сервер запущен.';
+        longUrlInput.value = initialUrl; // Оставляем ссылку при ошибке
     }
 });

@@ -20,5 +20,5 @@ func InitRoutes(s *service.Service) {
 	mux.HandleFunc("/", h.GetLongURLHandler)
 
 	log.Println("Server listening on :8080")
-	log.Fatal(http.ListenAndServe(":8080", mux))
+	http.ListenAndServe(":8080", mux)
 }
