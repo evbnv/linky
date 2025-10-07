@@ -5,10 +5,11 @@ import (
 	"linky/models"
 	"log"
 	"math/big"
+	"unicode/utf8"
 )
 
 const (
-	alphabet       = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	alphabet       = "абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ"
 	shortURLLength = 6
 )
 
@@ -22,9 +23,9 @@ func NewService(s models.Storer) *Service {
 
 func (s *Service) URLTransform(longURL string) string {
 	var shortURL string
-	shortURLBytes := make([]byte, shortURLLength)
-
-	alphabetLength := big.NewInt(int64(len(alphabet)))
+	shortURLRunes := make([]rune, shortURLLength)
+	alphabetRunes := []rune(alphabet)
+	alphabetLength := big.NewInt(int64(utf8.RuneCountInString(alphabet)))
 
 	for {
 		for i := 0; i < shortURLLength; i++ {
@@ -32,13 +33,12 @@ func (s *Service) URLTransform(longURL string) string {
 			if err != nil {
 				continue
 			}
-			shortURLBytes[i] = alphabet[index.Int64()]
+			shortURLRunes[i] = alphabetRunes[index.Int64()]
 		}
-		shortURL = string(shortURLBytes)
+		shortURL = string(shortURLRunes)
 		err := s.store.SaveURL(shortURL, longURL)
 		if err != nil {
 			log.Println(err)
-			// there is collision
 			log.Println("There is collision")
 			continue
 		}
