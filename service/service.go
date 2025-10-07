@@ -1,9 +1,15 @@
 package service
 
 import (
+	"crypto/rand"
 	"linky/models"
 	"log"
-	"math/rand"
+	"math/big"
+)
+
+const (
+	alphabet       = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	shortURLLength = 6
 )
 
 type Service struct {
@@ -15,15 +21,18 @@ func NewService(s models.Storer) *Service {
 }
 
 func (s *Service) URLTransform(longURL string) string {
-	alphabet := []byte{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-		'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'}
 	var shortURL string
-	shortURLBytes := make([]byte, 6)
+	shortURLBytes := make([]byte, shortURLLength)
+
+	alphabetLength := big.NewInt(int64(len(alphabet)))
 
 	for {
-		for i := range shortURLBytes {
-			index := rand.Intn(len(alphabet))
-			shortURLBytes[i] = alphabet[index]
+		for i := 0; i < shortURLLength; i++ {
+			index, err := rand.Int(rand.Reader, alphabetLength)
+			if err != nil {
+				continue
+			}
+			shortURLBytes[i] = alphabet[index.Int64()]
 		}
 		shortURL = string(shortURLBytes)
 		err := s.store.SaveURL(shortURL, longURL)
