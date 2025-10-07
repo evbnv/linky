@@ -1,12 +1,9 @@
 package service
 
 import (
-	"crypto/sha256"
-	"encoding/base64"
 	"linky/models"
 	"log"
 	"math/rand"
-	"strconv"
 )
 
 type Service struct {
@@ -18,19 +15,22 @@ func NewService(s models.Storer) *Service {
 }
 
 func (s *Service) URLTransform(longURL string) string {
+	alphabet := []byte{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+		'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'}
 	var shortURL string
-	tempLongURL := longURL
+	shortURLBytes := make([]byte, 6)
 
 	for {
-		h := sha256.New()
-		h.Write([]byte(tempLongURL))
-		shortURL = base64.URLEncoding.EncodeToString([]byte(h.Sum(nil)[:8]))
+		for i := range shortURLBytes {
+			index := rand.Intn(len(alphabet))
+			shortURLBytes[i] = alphabet[index]
+		}
+		shortURL = string(shortURLBytes)
 		err := s.store.SaveURL(shortURL, longURL)
 		if err != nil {
 			log.Println(err)
 			// there is collision
 			log.Println("There is collision")
-			tempLongURL = longURL + ":" + strconv.Itoa(rand.Int())
 			continue
 		}
 		break
