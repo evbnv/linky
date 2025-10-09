@@ -35,10 +35,12 @@ func (s *PostgresStore) GetURL(shortURL string) (string, error) {
 
 func InitDatabase() (*sql.DB, error) {
 	envs := &envs.ServerEnvs
-	connStr := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=%s",
+	connStr := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
+		envs.POSTGRES_HOST,
 		envs.POSTGRES_USER,
 		envs.POSTGRES_PASSWORD,
 		envs.POSTGRES_NAME,
+		envs.POSTGRES_PORT,
 		envs.POSTGRES_USE_SSL)
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
