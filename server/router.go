@@ -3,7 +3,7 @@ package server
 import (
 	"linky/handlers"
 	"linky/service"
-	"log"
+	"log/slog"
 	"net/http"
 )
 
@@ -19,6 +19,6 @@ func InitRoutes(s *service.Service) {
 	mux.HandleFunc("/api/shorten", h.PostShortURLHandler)
 	mux.HandleFunc("/", h.GetLongURLHandler)
 
-	log.Println("Server listening on :8080")
+	slog.Info("Server listening on :8080", "event", "server_started")
 	http.ListenAndServe(":8080", mux)
 }

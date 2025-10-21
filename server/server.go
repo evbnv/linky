@@ -5,23 +5,23 @@ import (
 	"linky/envs"
 	"linky/service"
 	"log"
+	"log/slog"
 )
 
 func RunServer() {
 	// Load envs
 	errEnvs := envs.LoadEnvs()
 	if errEnvs != nil {
-		// Вывод сообщения об ошибке
-		log.Fatal("Ошибка инициализации ENV: ", errEnvs)
+		log.Fatal("Error loading ENVs", "event", "envs_load_error", "error", errEnvs)
 	} else {
-		log.Println("Инициализация ENV прошла успешно")
+		slog.Info("ENVs successfully loaded", "event", "envs_loaded")
 	}
 	// Init database
 	dbClient, errDatabase := database.InitDatabase()
 	if errDatabase != nil {
-		log.Fatal("Ошибка подключения к базе данных: ", errDatabase)
+		log.Fatal("DB connection failed", errDatabase, "event", "db_connection_fail", "error", errDatabase)
 	} else {
-		log.Println("Успешное подключение к базе данных")
+		slog.Info("DB connection success", "event", "db_connection_success")
 	}
 	// Init store, service, routes
 	myStore := database.NewPostgresStore(dbClient)

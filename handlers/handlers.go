@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"linky/models"
 	"linky/service"
-	"log"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"strings"
@@ -39,7 +39,7 @@ func (h *Handler) GetLongURLHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
-	log.Println("Long URL got")
+	slog.Info("Redirect by shortUrl", "event", "redirect", "shortURL", shortPath, "longURL", longPath)
 	http.Redirect(w, r, longPath, http.StatusPermanentRedirect)
 }
 
@@ -72,6 +72,7 @@ func (h *Handler) PostShortURLHandler(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(ErrorResponse{Error: "Invalid URL. Please check the address for typos."})
+			slog.Error("Invalid URL provided", "event", "invalid_url", "url", req.URL, "error", err)
 			return
 		}
 	}

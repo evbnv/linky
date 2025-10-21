@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"linky/envs"
-	"log"
+	"log/slog"
 
 	_ "github.com/lib/pq"
 )
@@ -62,7 +62,7 @@ func createURLTable(db *sql.DB) error {
     	short_url VARCHAR(255) PRIMARY KEY,
     	long_url TEXT NOT NULL
 	)`
-	log.Println("Create table if not exists")
+	slog.Info("Created table if not exists", "event", "create_table_check", "table", "urls")
 	_, err := db.Exec(query)
 	return err
 }

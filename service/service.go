@@ -3,7 +3,7 @@ package service
 import (
 	"crypto/rand"
 	"linky/models"
-	"log"
+	"log/slog"
 	"math/big"
 	"unicode/utf8"
 )
@@ -38,13 +38,13 @@ func (s *Service) URLTransform(longURL string) string {
 		shortURL = string(shortURLRunes)
 		err := s.store.SaveURL(shortURL, longURL)
 		if err != nil {
-			log.Println(err)
-			log.Println("There is collision")
+			slog.Warn("Collision detected during short URL generation",
+				"event", "collision_detected", "shortURL", shortURL, "longURL", longURL, "error", err)
 			continue
 		}
 		break
 	}
-	log.Println("Short URL created")
+	slog.Info("Short URL succesfully generated", "event", "url_created", "shortURL", shortURL, "longURL", longURL)
 	return shortURL
 }
 
