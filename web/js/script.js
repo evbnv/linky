@@ -1,13 +1,12 @@
-// web/js/script.js
-
 document.getElementById('shorten-form').addEventListener('submit', async function (event) {
     event.preventDefault();
     const longUrlInput = document.getElementById('long-url');
-    const longUrl = longUrlInput.value;
     const resultDiv = document.getElementById('result');
     const errorDiv = document.getElementById('error-message');
+    const originalInput = longUrlInput.value.trim()
 
-    // Сброс сообщений
+    let longUrl = originalInput;
+
     resultDiv.style.display = 'none';
     errorDiv.style.display = 'none';
     errorDiv.innerHTML = '';
@@ -18,8 +17,18 @@ document.getElementById('shorten-form').addEventListener('submit', async functio
         return;
     }
 
-    // Сохраняем введенную ссылку перед отправкой
-    const initialUrl = longUrl;
+    const hasProtocol = /^(https?|ftp|s?ftp|file|data):\/\//i.test(longUrl);
+
+    if (!hasProtocol) {
+        longUrl = 'https://' + longUrl;
+    }
+
+    const MAX_URL_LENGTH = 2000;
+    if (longUrl.length > MAX_URL_LENGTH) {
+        errorDiv.style.display = 'flex';
+        errorDiv.innerHTML = '❌ Слишком длинная ссылка. Максимум ' + MAX_URL_LENGTH + ' символов.';
+        return;
+    }
 
     try {
         const response = await fetch('/api/shorten', {
@@ -31,26 +40,29 @@ document.getElementById('shorten-form').addEventListener('submit', async functio
         const data = await response.json();
 
         if (response.ok) {
-            const shortLink = data.short_url;
+            const shortCode = data.short_url;
+
+            const currentHost = window.location.host;
+
+            const copyLink = 'https://' + currentHost.replace('www.', '') + '/' + shortCode;
+
+            const displayLink = currentHost.replace('www.', '') + '/' + shortCode;
 
             resultDiv.style.display = 'flex';
 
-            // --- ИЗМЕНЕНИЕ: УДАЛЕНА ХЛОПУШКА, ОСТАВЛЕНО ТОЛЬКО "Успех! ✨" ---
             resultDiv.innerHTML = `
-                <div style="flex-grow: 1;">
-                    Успех! ✨ Сокращенная ссылка: <a href="${shortLink}">${shortLink}</a>
-                </div>
-                <button id="copy-button" class="copy-button">📄 Копировать</button>
-            `;
+        <div style="flex-grow: 1;">
+            Успех! ✨ Сокращенная ссылка: <a href="${copyLink}">${displayLink}</a>
+        </div>
+        <button id="copy-button" class="copy-button"> Копировать</button>`;
 
-            // Ссылку оставляем в поле ввода
-            longUrlInput.value = initialUrl;
+            longUrlInput.value = originalInput;
 
             document.getElementById('copy-button').addEventListener('click', () => {
-                navigator.clipboard.writeText(shortLink).then(() => {
+                navigator.clipboard.writeText(copyLink).then(() => {
                     alert('Ссылка скопирована!');
                 }).catch(err => {
-                    console.error('Ошибка копирования: ', err);
+                    console.error('Ошибка копирования:', err);
                     alert('Не удалось скопировать. Попробуйте вручную.');
                 });
             });
@@ -58,11 +70,11 @@ document.getElementById('shorten-form').addEventListener('submit', async functio
         } else {
             errorDiv.style.display = 'flex';
             errorDiv.innerHTML = '❌ Ошибка: ' + (data.error || 'Неизвестная ошибка сервера');
-            longUrlInput.value = initialUrl; // Оставляем ссылку при ошибке
+            longUrlInput.value = originalInput;
         }
     } catch (e) {
         errorDiv.style.display = 'flex';
         errorDiv.innerHTML = '❌ Ошибка подключения. Убедитесь, что сервер запущен.';
-        longUrlInput.value = initialUrl; // Оставляем ссылку при ошибке
+        longUrlInput.value = originalInput;
     }
 });

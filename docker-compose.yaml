@@ -1,6 +1,6 @@
 services:
   linky:
-    image: linky-app:latest
+    # image: linky-app:latest
     build:
       context: .
       dockerfile: Dockerfile

@@ -233,3 +233,34 @@ button[type="submit"]:hover {
         margin-bottom: 10px;
     }
 }
+
+.main-content {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 20px;
+}
+
+.input-group {
+    display: flex;
+    gap: 10px;
+}
+
+@media (max-width: 600px) {
+    .main-content {
+        max-width: 90%;
+        /* Сделать шире на мобильных */
+        padding: 10px;
+        margin: 20px auto;
+    }
+
+    .input-group {
+        flex-direction: column;
+        /* Элементы один под другим */
+    }
+
+    #shorten-button {
+        /* Кнопка "Сократить" */
+        width: 100%;
+        margin-top: 10px;
+    }
+}

@@ -59,6 +59,16 @@ func (h *Handler) PostShortURLHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// URL validation
+
+	// Length check
+	if len(req.URL) > 2000 {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(ErrorResponse{Error: "URL length is too big"})
+		return
+	}
+
+	// Empty check
 	if req.URL == "" {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
