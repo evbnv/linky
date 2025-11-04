@@ -3,7 +3,7 @@ document.getElementById('shorten-form').addEventListener('submit', async functio
     const longUrlInput = document.getElementById('long-url');
     const resultDiv = document.getElementById('result');
     const errorDiv = document.getElementById('error-message');
-    const originalInput = longUrlInput.value.trim()
+    const originalInput = longUrlInput.value.trim();
 
     let longUrl = originalInput;
 
@@ -30,6 +30,12 @@ document.getElementById('shorten-form').addEventListener('submit', async functio
         return;
     }
 
+    if (typeof punycode === 'undefined' || !punycode.toUnicode) {
+        errorDiv.style.display = 'flex';
+        errorDiv.innerHTML = '❌ Ошибка: Библиотека punycode.js не найдена. Пожалуйста, подключите её в HTML.';
+        return;
+    }
+
     try {
         const response = await fetch('/api/shorten', {
             method: 'POST',
@@ -42,23 +48,28 @@ document.getElementById('shorten-form').addEventListener('submit', async functio
         if (response.ok) {
             const shortCode = data.short_url;
 
-            const currentHost = window.location.host;
+            const technicalHost = window.location.hostname;
 
-            const copyLink = 'https://' + currentHost.replace('www.', '') + '/' + shortCode;
+            const displayHost = punycode.toUnicode(technicalHost);
 
-            const displayLink = currentHost.replace('www.', '') + '/' + shortCode;
+            const displayLink = displayHost + '/' + shortCode;
+
+            const copyLink = 'https://' + displayLink;
+
+            const technicalLink = 'https://' + technicalHost + '/' + shortCode;
 
             resultDiv.style.display = 'flex';
 
             resultDiv.innerHTML = `
         <div style="flex-grow: 1;">
-            Успех! ✨ Сокращенная ссылка: <a href="${copyLink}">${displayLink}</a>
+            Успех! ✨ Сокращенная ссылка: <a href="${technicalLink}">${displayLink}</a>
         </div>
         <button id="copy-button" class="copy-button"> Копировать</button>`;
 
             longUrlInput.value = originalInput;
 
             document.getElementById('copy-button').addEventListener('click', () => {
+
                 navigator.clipboard.writeText(copyLink).then(() => {
                     alert('Ссылка скопирована!');
                 }).catch(err => {

@@ -1,6 +1,6 @@
 services:
   linky:
-    # image: linky-app:latest
+    image: evbnv/linky:latest
     build:
       context: .
       dockerfile: Dockerfile
