@@ -1,1 +1,1 @@
-Linky - simple URL shortener
+https://сократи.рф - простой сокращатель ссылок
